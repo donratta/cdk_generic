@@ -8,23 +8,30 @@ import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 
 // GENERATE THE APP CONTEXT HERE
 const app = new cdk.App();
+const DEFAULT_ENV = { region: 'eu-west-2', account: '963850480156' };
 
 // THESE ARE THE LIST OF THE ENVIRONMENT VARIABLES THAT WILL BE INJECTED INTO THE CONTAINER FOR ECS
-const API_ENV_KEYS = [
+const EFFIFLOW_BACKEND_API_KEYS = [
+    'POSTGRES_HOST',
+    'POSTGRES_PORT',
+    'POSTGRES_USER',
+    'POSTGRES_PASSWORD',
+    'POSTGRES_DB'
 ];
 
 
 // THE HOSTED ZONE ID FOR YOUR DOMAIN GOTTEN FROM ROUTE53
 const DOMAIN_HOSTED_ZONE_ID = 'Z039618222QNF7YZU8PIT';
 const DOMAIN_ZONE_NAME = 'sofriwebservices.com';
-const vpc = new VpcStack(app, 'vpc');
+const vpc = new VpcStack(app, 'vpc', { env: DEFAULT_ENV });
 
 
-new DatabaseStack(app, 'effiflow-backend-stg', {
+new DatabaseStack(app, 'effiflow-backend-postgres-stg', {
     vpc: vpc.vpc,
     secretName: 'stg/effiflow-backend/postgres', // The secret name from AWS Secrets Manager
     databaseName: 'postgres',
     subnetType: SubnetType.PRIVATE_ISOLATED,
+    env: DEFAULT_ENV
 });
 
 new FargateStack(app, 'effiflow-backend-stg', {
@@ -36,12 +43,14 @@ new FargateStack(app, 'effiflow-backend-stg', {
     instanceCount: 1,
     containerRepoName: 'effiflow-backend',
     containerTag: 'initial',
-    environmentSecretId: 'effiflow-backend-app/staging',
-    domainName: 'stg.effiflow-backend.sofriwebservices.co',
+    environmentSecretId: 'stg/effiflow-backend-api',
+    domainName: 'stg.effiflow-backend.sofriwebservices.com',
     hostedZoneID: DOMAIN_HOSTED_ZONE_ID,
     zoneName: DOMAIN_ZONE_NAME,
     containerPort: 3000,
-    listOfKeys: []
+    listOfKeys: EFFIFLOW_BACKEND_API_KEYS,
+    healthCheckPath: '/',
+    env: DEFAULT_ENV
 });
 
 

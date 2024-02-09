@@ -17,7 +17,7 @@ export class VpcStack extends cdk.Stack {
                 },
                 {
                     name: 'private-subnet-1',
-                    subnetType: ec2.SubnetType.PRIVATE_WITH_NAT,
+                    subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
                     cidrMask: 24
                 },
                 {
