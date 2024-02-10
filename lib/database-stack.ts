@@ -9,14 +9,14 @@ export interface DatabaseStackProps extends cdk.StackProps {
   databaseName: string;
   secretName: string;
   vpc: ec2.Vpc;
-  subnetType: SubnetType
+  subnetType: SubnetType;
 }
 export class DatabaseStack extends cdk.Stack {
     readonly databaseInstance: DatabaseInstance;
     constructor(scope: cdk.App, id: string, props: DatabaseStackProps) {
         super(scope, id, props);
         const secret = Secret.fromSecretNameV2(this, `${id}-database-username`, props.secretName);
-        const engine = aws_rds.DatabaseInstanceEngine.postgres({ version: PostgresEngineVersion.VER_13_7 });
+        const engine = aws_rds.DatabaseInstanceEngine.postgres({ version: PostgresEngineVersion.VER_13_8 });
         const username = secret.secretValueFromJson('username').unsafeUnwrap().toString();
         const password = secret.secretValueFromJson('password');
 
