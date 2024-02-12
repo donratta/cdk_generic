@@ -53,6 +53,21 @@ new FargateStack(app, 'effiflow-backend-stg', {
     env: DEFAULT_ENV
 });
 
-
-
-
+new FargateStack(app, 'effiflow-frontend-stg', {
+    vpc: vpc.vpc,
+    clusterId: 'effiflow-frontend-stg-cluster',
+    serviceId: 'effiflow-frontend-stg-service',
+    memory: 1024,
+    cpu: 512,
+    instanceCount: 1,
+    containerRepoName: 'effiflow-frontend',
+    containerTag: 'initial',
+    environmentSecretId: '',
+    domainName: 'stg.effiflow.sofriwebservices.com',
+    hostedZoneID: DOMAIN_HOSTED_ZONE_ID,
+    zoneName: DOMAIN_ZONE_NAME,
+    containerPort: 80,
+    listOfKeys: [],
+    healthCheckPath: '/',
+    env: DEFAULT_ENV
+});
