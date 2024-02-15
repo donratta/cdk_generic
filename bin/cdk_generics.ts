@@ -19,6 +19,16 @@ const EFFIFLOW_BACKEND_API_KEYS = [
     'POSTGRES_DB'
 ];
 
+const SOFRI_VERIFY_BACKEND = [
+    'DATABASE_TYPE',
+    'DATABASE_NAME',
+    'DATABASE_USERNAME',
+    'PASSWORD',
+    'DATABASE_HOST',
+    'PORT',
+    'SERVER_PORT'
+];
+
 
 // THE HOSTED ZONE ID FOR YOUR DOMAIN GOTTEN FROM ROUTE53
 const DOMAIN_HOSTED_ZONE_ID = 'Z039618222QNF7YZU8PIT';
@@ -71,3 +81,32 @@ new FargateStack(app, 'effiflow-frontend-stg', {
     healthCheckPath: '/',
     env: DEFAULT_ENV
 });
+
+// sofri verify
+new DatabaseStack(app, 'sofriverify-database', {
+    vpc: vpc.vpc,
+    secretName: 'prod/sofriverifymysql', // The secret name from AWS Secrets Manager
+    databaseName: 'sofriverify_db',
+    engineType: 'mysql',
+    subnetType: SubnetType.PUBLIC,
+    env: DEFAULT_ENV
+});
+
+new FargateStack(app, 'sofri-verify-backend', {
+    vpc: vpc.vpc,
+    clusterId: 'sofri-verify-backend-cluster',
+    serviceId: 'sofri-verify-backend-service',
+    memory: 1024,
+    cpu: 512,
+    instanceCount: 1,
+    containerRepoName: 'sofri-user-verification-backend',
+    containerTag: 'initial',
+    environmentSecretId: 'prod/sofri-user-verify-backend/app',
+    domainName: 'api.sofri-verify.sofriwebservices.com',
+    hostedZoneID: DOMAIN_HOSTED_ZONE_ID,
+    zoneName: DOMAIN_ZONE_NAME,
+    containerPort: 3000,
+    listOfKeys: SOFRI_VERIFY_BACKEND,
+    healthCheckPath: '/',
+    env: DEFAULT_ENV
+})
